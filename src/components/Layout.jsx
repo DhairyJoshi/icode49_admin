@@ -4,7 +4,6 @@ import {
   HomeIcon, 
   DocumentTextIcon, 
   FolderIcon, 
-  Cog6ToothIcon,
   ClipboardDocumentListIcon,
   AdjustmentsHorizontalIcon,
   Square3Stack3DIcon
@@ -18,7 +17,7 @@ function Layout() {
   // Set sidebar state based on screen size
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) { // lg breakpoint
+      if (window.innerWidth >= 1024) {
         setSidebarOpen(true)
       } else {
         setSidebarOpen(false)

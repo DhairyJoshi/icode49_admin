@@ -171,3 +171,33 @@ export async function portfolioUpdateAPI({ id, category, title, description, pro
   });
   return res.json();
 }
+
+// Blog Update API
+export async function blogUpdateAPI({ id, category, title, poster, poster_alt, image, image_alt, description, author, publish_date, read_time, seo_title, seo_description, seo_keywords, og_title, og_description, og_image, og_type, og_image_alt }) {
+  const formData = new FormData();
+  formData.append('id', id);
+  formData.append('category', category);
+  formData.append('title', title);
+  if (poster) formData.append('poster', poster);
+  formData.append('poster_alt', poster_alt);
+  if (image) formData.append('image', image);
+  formData.append('image_alt', image_alt);
+  formData.append('description', description);
+  formData.append('author', author);
+  formData.append('publish_date', publish_date);
+  formData.append('read_time', read_time);
+  formData.append('seo_title', seo_title);
+  formData.append('seo_description', seo_description);
+  formData.append('seo_keywords', seo_keywords);
+  formData.append('og_title', og_title);
+  formData.append('og_description', og_description);
+  if (og_image) formData.append('og_image', og_image);
+  formData.append('og_type', og_type);
+  formData.append('og_image_alt', og_image_alt);
+
+  const res = await fetch(`${BASE_API_URL}blog_update/`, {
+    method: 'POST',
+    body: formData,
+  });
+  return res.json();
+}

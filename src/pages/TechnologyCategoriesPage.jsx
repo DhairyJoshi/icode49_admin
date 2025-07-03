@@ -35,7 +35,7 @@ function TechnologyCategoriesPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto bg-white p-6 rounded shadow">
+    <div className="mx-auto bg-white p-6 rounded shadow">
       <h2 className="text-xl font-bold mb-4">Technology Categories</h2>
       <form className="flex flex-col gap-2 mb-4" onSubmit={handleAddCategory}>
         <input

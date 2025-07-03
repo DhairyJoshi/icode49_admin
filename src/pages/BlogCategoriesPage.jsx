@@ -22,7 +22,7 @@ function BlogCategoriesPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto bg-white p-6 rounded shadow">
+    <div className="mx-auto bg-white p-6 rounded shadow">
       <h2 className="text-xl font-bold mb-4">Blog Categories</h2>
       <div className="flex mb-4">
         <input

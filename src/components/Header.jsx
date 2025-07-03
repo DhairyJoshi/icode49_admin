@@ -33,7 +33,7 @@ function Header({ sidebarOpen, setSidebarOpen, navigation, master, headerMarginC
   return (
     <>
       {/* Top header bar */}
-      <div className={`sticky top-2 z-50 flex h-16 items-center justify-between bg-white px-2 shadow-sm mx-4 my-2 rounded-lg ${headerMarginClass}`}>
+      <div className={`sticky top-4 z-50 flex h-16 items-center justify-between bg-white px-2 shadow-sm mx-4 my-2 rounded-lg ${headerMarginClass}`}>
         {/* Logo left */}
         <div className="flex items-center h-full gap-2">
           {/* Mobile sidebar toggle */}
@@ -150,18 +150,21 @@ function Header({ sidebarOpen, setSidebarOpen, navigation, master, headerMarginC
                 <ChevronDownIcon className={`h-5 w-5 ml-2 transition-transform ${masterMenuOpen ? 'rotate-180' : ''}`} />
               </button>
               {masterMenuOpen && (
-                <div className="absolute top-0 left-full ml-2 w-56 bg-white shadow-lg rounded-md py-2 z-50 flex flex-col gap-1 border border-gray-100">
-                  {master.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`group flex items-center px-4 py-2 text-sm font-medium rounded-md w-full text-left ${window.location.pathname === item.href ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
-                    >
-                      <item.icon className="mr-3 h-5 w-5" />
-                      <span className="flex-1">{item.name}</span>
-                    </Link>
-                  ))}
+                <div className="absolute top-0 left-full ml-2 w-56 shadow-lg rounded-md py-2 z-50 flex flex-row border border-gray-100">
+                  <div className="w-1 bg-green-600 rounded-l-md mr-2"></div>
+                  <div className="flex flex-col gap-1 w-full">
+                    {master.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`group flex items-center px-4 py-2 text-sm font-medium rounded-md w-full text-left ${window.location.pathname === item.href ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                      >
+                        <item.icon className="mr-3 h-5 w-5" />
+                        <span className="flex-1">{item.name}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -169,7 +172,7 @@ function Header({ sidebarOpen, setSidebarOpen, navigation, master, headerMarginC
         </div>
       </div>
       {/* Desktop sidebar */}
-      <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${sidebarOpen ? 'translate-x-0 mx-4 my-2' : '-translate-x-full my-2'}`} style={{ zIndex: 39 }}>
+      <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${sidebarOpen ? 'translate-x-0 mx-4 my-4' : '-translate-x-full my-4'}`} style={{ zIndex: 39 }}>
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200 rounded-lg">
           <div className="flex h-16 items-center px-4">
             <img src="/images/logo.png" alt="Logo" className="h-8 w-auto object-contain" />
@@ -197,17 +200,20 @@ function Header({ sidebarOpen, setSidebarOpen, navigation, master, headerMarginC
                 <ChevronDownIcon className={`h-5 w-5 ml-2 transition-transform ${masterMenuOpen ? 'rotate-180' : ''}`} />
               </button>
               {masterMenuOpen && (
-                <div className="ml-8 mt-1 flex flex-col gap-1">
-                  {master.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left ${window.location.pathname === item.href ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
-                    >
-                      <item.icon className="mr-3 h-5 w-5" />
-                      <span className="flex-1">{item.name}</span>
-                    </Link>
-                  ))}
+                <div className="ml-8 mt-1 flex flex-row gap-1">
+                  <div className="w-[1.5px] bg-gray-300 rounded-lg -ml-3 mr-2"></div>
+                  <div className="flex flex-col gap-1 w-full">
+                    {master.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left ${window.location.pathname === item.href ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                      >
+                        <item.icon className="mr-3 h-5 w-5" />
+                        <span className="flex-1">{item.name}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

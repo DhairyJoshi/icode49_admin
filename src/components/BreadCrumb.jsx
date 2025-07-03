@@ -11,6 +11,7 @@ function BreadCrumb({ bannerOpen }) {
     '/project-categories': 'Project Categories',
     '/technology-categories': 'Technology Categories',
     '/login': 'Login',
+    '/profile': 'Profile',
   };
   const currentPage = pathNameMap[location.pathname] || 'Page';
 

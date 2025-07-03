@@ -9,7 +9,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+    <div className="mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
       <h2 className="text-2xl font-bold mb-4 text-pink-600">Profile</h2>
       <div className="mb-4">
         <div className="text-lg font-semibold">{user.firstname} {user.lastname}</div>

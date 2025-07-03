@@ -5,12 +5,13 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { Editor } from 'primereact/editor'
-import { allBlogCategoryAPI } from '../api'
+import { allBlogCategoryAPI, blogUpdateAPI } from '../api'
 import { fetchBlogs, createBlog } from '../slices/blogsSlice'
+import BlogTable from "./BlogTable";
 
 function BlogManager() {
   const dispatch = useDispatch()
-  const { items: blogs, error, createStatus, createError, createSuccess } = useSelector(state => state.blogs)
+  const { items: blogs, createStatus, createError, createSuccess } = useSelector(state => state.blogs)
 
   // Drawer state and form state
   const [showDrawer, setShowDrawer] = useState(false)
@@ -36,11 +37,10 @@ function BlogManager() {
     og_image_alt: '',
   })
   const [categories, setCategories] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState('')
   const [imagePosterPreview, setImagePosterPreview] = useState(null)
   const [image1Preview, setImage1Preview] = useState(null)
   const [ogImagePreview, setOgImagePreview] = useState(null)
+  const [editingBlog, setEditingBlog] = useState(null);
 
   // Add a base URL for images
   const IMAGE_BASE_URL = 'http://164.52.202.121:4545'
@@ -64,54 +64,84 @@ function BlogManager() {
   }, [])
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    dispatch(createBlog({
-      category: formData.category,
-      title: formData.title,
-      poster: formData.image_poster,
-      poster_alt: formData.image_poster_alt,
-      image: formData.image_1_poster,
-      image_alt: formData.image_1_alt,
-      description: formData.body,
-      author: formData.author,
-      publish_date: formData.publish_date,
-      read_time: formData.read_time,
-      seo_title: formData.seo_title,
-      seo_description: formData.seo_description,
-      seo_keywords: formData.seo_keywords,
-      og_title: formData.og_title,
-      og_description: formData.og_description,
-      og_image: formData.og_image,
-      og_type: formData.og_type,
-      og_image_alt: formData.og_image_alt,
-    })).then((action) => {
-      if (action.type.endsWith('fulfilled')) {
-        setShowDrawer(false)
-        setFormData({
-          image_poster: null,
-          image_poster_alt: '',
-          image_1_poster: null,
-          image_1_alt: '',
-          title: '',
-          category: '',
-          body: '',
-          author: '',
-          publish_date: '',
-          read_time: '',
-          status: '',
-          seo_title: '',
-          seo_description: '',
-          seo_keywords: '',
-          og_title: '',
-          og_description: '',
-          og_image: null,
-          og_type: '',
-          og_image_alt: '',
-        })
-        dispatch(fetchBlogs())
+    e.preventDefault();
+    if (editingBlog) {
+      // Update blog
+      const res = await blogUpdateAPI({
+        id: editingBlog.id || editingBlog._id,
+        category: formData.category,
+        title: formData.title,
+        poster: formData.image_poster,
+        poster_alt: formData.image_poster_alt,
+        image: formData.image_1_poster,
+        image_alt: formData.image_1_alt,
+        description: formData.body,
+        author: formData.author,
+        publish_date: formData.publish_date,
+        read_time: formData.read_time,
+        seo_title: formData.seo_title,
+        seo_description: formData.seo_description,
+        seo_keywords: formData.seo_keywords,
+        og_title: formData.og_title,
+        og_description: formData.og_description,
+        og_image: formData.og_image,
+        og_type: formData.og_type,
+        og_image_alt: formData.og_image_alt,
+      });
+      if (res.status === 'true' || res.statuscode === 200) {
+        setShowDrawer(false);
+        setEditingBlog(null);
+        dispatch(fetchBlogs());
       }
-    })
-  }
+    } else {
+      dispatch(createBlog({
+        category: formData.category,
+        title: formData.title,
+        poster: formData.image_poster,
+        poster_alt: formData.image_poster_alt,
+        image: formData.image_1_poster,
+        image_alt: formData.image_1_alt,
+        description: formData.body,
+        author: formData.author,
+        publish_date: formData.publish_date,
+        read_time: formData.read_time,
+        seo_title: formData.seo_title,
+        seo_description: formData.seo_description,
+        seo_keywords: formData.seo_keywords,
+        og_title: formData.og_title,
+        og_description: formData.og_description,
+        og_image: formData.og_image,
+        og_type: formData.og_type,
+        og_image_alt: formData.og_image_alt,
+      })).then((action) => {
+        if (action.type.endsWith('fulfilled')) {
+          setShowDrawer(false);
+          setFormData({
+            image_poster: null,
+            image_poster_alt: '',
+            image_1_poster: null,
+            image_1_alt: '',
+            title: '',
+            category: '',
+            body: '',
+            author: '',
+            publish_date: '',
+            read_time: '',
+            status: '',
+            seo_title: '',
+            seo_description: '',
+            seo_keywords: '',
+            og_title: '',
+            og_description: '',
+            og_image: null,
+            og_type: '',
+            og_image_alt: '',
+          });
+          dispatch(fetchBlogs());
+        }
+      });
+    }
+  };
 
   const handlePosterImageChange = (e) => {
     const file = e.target.files[0]
@@ -131,6 +161,64 @@ function BlogManager() {
     setOgImagePreview(file ? URL.createObjectURL(file) : null)
   }
 
+  const openEditDrawer = (blog) => {
+    setEditingBlog(blog);
+    setFormData({
+      image_poster: null,
+      image_poster_alt: blog.poster_alt || '',
+      image_1_poster: null,
+      image_1_alt: blog.image_alt || '',
+      title: blog.title || '',
+      category: blog.category || blog.category_name || '',
+      body: blog.description || '',
+      author: blog.author || '',
+      publish_date: blog.publish_date || '',
+      read_time: blog.read_time || '',
+      status: blog.status || '',
+      seo_title: blog.seo_title || '',
+      seo_description: blog.seo_description || '',
+      seo_keywords: blog.seo_keywords || '',
+      og_title: blog.og_title || '',
+      og_description: blog.og_description || '',
+      og_image: null,
+      og_type: blog.og_type || '',
+      og_image_alt: blog.og_image_alt || '',
+    });
+    setImagePosterPreview(blog.poster ? IMAGE_BASE_URL + blog.poster : null);
+    setImage1Preview(blog.image ? IMAGE_BASE_URL + blog.image : null);
+    setOgImagePreview(blog.og_image ? IMAGE_BASE_URL + blog.og_image : null);
+    setShowDrawer(true);
+  };
+
+  const openCreateDrawer = () => {
+    setEditingBlog(null);
+    setFormData({
+      image_poster: null,
+      image_poster_alt: '',
+      image_1_poster: null,
+      image_1_alt: '',
+      title: '',
+      category: '',
+      body: '',
+      author: '',
+      publish_date: '',
+      read_time: '',
+      status: '',
+      seo_title: '',
+      seo_description: '',
+      seo_keywords: '',
+      og_title: '',
+      og_description: '',
+      og_image: null,
+      og_type: '',
+      og_image_alt: '',
+    });
+    setImagePosterPreview(null);
+    setImage1Preview(null);
+    setOgImagePreview(null);
+    setShowDrawer(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -140,8 +228,8 @@ function BlogManager() {
           <p className="text-sm text-gray-500">Manage your blog posts and articles</p>
         </div>
         <button
-          onClick={() => setShowDrawer(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          onClick={openCreateDrawer}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-700 cursor-pointer"
         >
           <PlusIcon className="h-4 w-4 mr-2" />
           Add Blog
@@ -149,65 +237,21 @@ function BlogManager() {
       </div>
 
       {/* Blogs List */}
-      <div className="bg-white shadow rounded-lg">
-        {loading && (
-          <div className="text-center py-12 text-gray-500">Loading blogs...</div>
-        )}
-        {error && (
-          <div className="text-center py-12 text-red-500">Error: {error}</div>
-        )}
-        {blogs.length > 0 && (
-          <div className="overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Poster</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Publish Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {blogs.map((blog) => (
-                  <tr key={blog.id || blog._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {blog.poster && (
-                        <img src={`${IMAGE_BASE_URL}${blog.poster}`} alt={blog.poster_alt || 'Poster'} className="h-12 w-20 object-cover rounded" />
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{blog.title}</div>
-                      <div className="text-xs text-gray-500 line-clamp-2 max-w-xs">{blog.description}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{blog.category_name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{blog.author}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{blog.publish_date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{blog.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        {blogs.length === 0 && (
-          <div className="text-center py-12 text-gray-500">No blogs found.</div>
-        )}
-      </div>
+      <BlogTable blogs={blogs} onEdit={openEditDrawer} onView={() => {}} onDelete={() => {}} />
+
       {/* Drawer */}
       <div>
         {showDrawer && (
-          <div className="fixed inset-0 bg-white/35 backdrop-blur-sm bg-opacity-40 z-40 transition-opacity" onClick={() => setShowDrawer(false)} />
+          <div className="fixed inset-0 bg-white/35 backdrop-blur-sm bg-opacity-40 z-[9999] transition-opacity" onClick={() => setShowDrawer(false)} />
         )}
         <div
-          className={`fixed inset-y-0 right-0 z-50 w-full max-w-4xl bg-white shadow-2xl flex flex-col h-full transition-transform duration-300 ease-in-out transform ${showDrawer ? 'translate-x-0' : 'translate-x-full'} pointer-events-auto`}
+          className={`fixed inset-y-0 right-0 z-[10000] w-full max-w-4xl bg-white shadow-2xl flex flex-col h-full transition-transform duration-300 ease-in-out transform ${showDrawer ? 'translate-x-0' : 'translate-x-full'} pointer-events-auto`}
           style={{ willChange: 'transform' }}
         >
           <div className="flex items-center justify-between px-6 py-4 border-b">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">Create Blog</h2>
-              <p className="text-gray-500 mt-1 text-sm">Fill in the details below to add a new blog post</p>
+              <h2 className="text-2xl font-bold text-gray-800">{editingBlog ? 'Update Blog' : 'Create Blog'}</h2>
+              <p className="text-gray-500 mt-1 text-sm">{editingBlog ? 'Edit the details below to update the blog post' : 'Fill in the details below to add a new blog post'}</p>
             </div>
             <button
               type="button"
@@ -481,7 +525,7 @@ function BlogManager() {
                 type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition duration-150 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
-                Create Blog
+                {editingBlog ? 'Update Blog' : 'Create Blog'}
               </button>
             </div>
           </form>
