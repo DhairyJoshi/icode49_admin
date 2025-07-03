@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
-import { 
-  DocumentTextIcon, 
-  FolderIcon, 
-  EyeIcon,
-  ArrowTrendingUpIcon,
+import {
+  DocumentTextIcon,
+  FolderIcon,
   CalendarIcon
 } from '@heroicons/react/24/outline'
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
+  const navigate = useNavigate();
+
   const [stats, setStats] = useState({
     totalBlogs: 0,
     totalProjects: 0,
@@ -19,12 +20,12 @@ function Dashboard() {
     // Simulate loading stats from localStorage or API
     const blogs = JSON.parse(localStorage.getItem('blogs') || '[]')
     const projects = JSON.parse(localStorage.getItem('projects') || '[]')
-    
+
     setStats({
       totalBlogs: blogs.length,
       totalProjects: projects.length,
-      totalViews: blogs.reduce((sum, blog) => sum + (blog.views || 0), 0) + 
-                  projects.reduce((sum, project) => sum + (project.views || 0), 0),
+      totalViews: blogs.reduce((sum, blog) => sum + (blog.views || 0), 0) +
+        projects.reduce((sum, project) => sum + (project.views || 0), 0),
       recentActivity: [
         ...blogs.map(blog => ({ ...blog, type: 'blog', date: new Date(blog.createdAt || Date.now()) })),
         ...projects.map(project => ({ ...project, type: 'project', date: new Date(project.createdAt || Date.now()) }))
@@ -36,59 +37,56 @@ function Dashboard() {
     {
       name: 'Total Blogs',
       value: stats.totalBlogs,
-      icon: DocumentTextIcon,
+      img: '/images/blog.png',
       color: 'bg-blue-500',
       textColor: 'text-blue-600'
     },
     {
       name: 'Total Projects',
       value: stats.totalProjects,
-      icon: FolderIcon,
+      img: '/images/project.png',
       color: 'bg-green-500',
       textColor: 'text-green-600'
     },
     {
       name: 'Total Views',
       value: stats.totalViews.toLocaleString(),
-      icon: EyeIcon,
+      img: '/images/views.png',
       color: 'bg-purple-500',
       textColor: 'text-purple-600'
     },
     {
       name: 'Growth Rate',
       value: '+12%',
-      icon: ArrowTrendingUpIcon,
+      img: '/images/growth.png',
       color: 'bg-orange-500',
       textColor: 'text-orange-600'
     }
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Stats Overview */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Overview</h3>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {statCards.map((stat) => (
             <div
               key={stat.name}
-              className="bg-white overflow-hidden shadow rounded-lg"
+              className="bg-white shadow rounded-lg"
             >
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <stat.icon className={`h-6 w-6 ${stat.textColor}`} />
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        {stat.name}
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {stat.value}
-                      </dd>
-                    </dl>
-                  </div>
+              <div className="p-5 flex items-center">
+                <div className="flex-shrink-0">
+                  <img src={stat.img} alt={stat.name} className="h-16 w-16 object-contain rounded" onError={e => { e.target.style.display = 'none'; }} />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      {stat.name}
+                    </dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {stat.value}
+                    </dd>
+                  </dl>
                 </div>
               </div>
             </div>
@@ -98,7 +96,7 @@ function Dashboard() {
 
       {/* Recent Activity */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Recent Activity</h3>
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             {stats.recentActivity.length > 0 ? (
@@ -115,9 +113,8 @@ function Dashboard() {
                         ) : null}
                         <div className="relative flex space-x-3">
                           <div>
-                            <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
-                              activity.type === 'blog' ? 'bg-blue-500' : 'bg-green-500'
-                            }`}>
+                            <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${activity.type === 'blog' ? 'bg-blue-500' : 'bg-green-500'
+                              }`}>
                               {activity.type === 'blog' ? (
                                 <DocumentTextIcon className="h-5 w-5 text-white" />
                               ) : (
@@ -161,14 +158,14 @@ function Dashboard() {
 
       {/* Quick Actions */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Quick Actions</h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="bg-white shadow rounded-lg p-6">
             <h4 className="text-base font-medium text-gray-900 mb-2">Create New Blog</h4>
             <p className="text-sm text-gray-500 mb-4">
               Add a new blog post to your portfolio
             </p>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+            <button onClick={() => navigate('/blogs')} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
               <DocumentTextIcon className="h-4 w-4 mr-2" />
               New Blog
             </button>
@@ -178,7 +175,7 @@ function Dashboard() {
             <p className="text-sm text-gray-500 mb-4">
               Add a new project to showcase your work
             </p>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+            <button onClick={() => navigate('/projects')} className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
               <FolderIcon className="h-4 w-4 mr-2" />
               New Project
             </button>

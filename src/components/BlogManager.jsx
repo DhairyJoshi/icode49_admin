@@ -1,16 +1,16 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { 
   PlusIcon, 
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { Editor } from 'primereact/editor'
-import { blogCreateAPI, allBlogCategoryAPI, allBlogListAPI } from '../api'
+import { allBlogCategoryAPI } from '../api'
 import { fetchBlogs, createBlog } from '../slices/blogsSlice'
 
 function BlogManager() {
   const dispatch = useDispatch()
-  const { items: blogs, status, error, createStatus, createError, createSuccess } = useSelector(state => state.blogs)
+  const { items: blogs, error, createStatus, createError, createSuccess } = useSelector(state => state.blogs)
 
   // Drawer state and form state
   const [showDrawer, setShowDrawer] = useState(false)
@@ -367,13 +367,16 @@ function BlogManager() {
               {/* Status */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <input
-                  type="text"
+                <select
                   value={formData.status}
                   onChange={e => setFormData({ ...formData, status: e.target.value })}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300"
-                  placeholder="Status"
-                />
+                >
+                  <option value="" disabled>Select status</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Published">Published</option>
+                  <option value="Archived">Archived</option>
+                </select>
               </div>
               {/* SEO Title */}
               <div className="md:col-span-2">

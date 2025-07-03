@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage'
 import { useAuth } from './AuthContext'
 import TechnologyCategoriesPage from './pages/TechnologyCategoriesPage'
 import HomePage from './pages/HomePage'
+import ProfilePage from './pages/ProfilePage'
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
@@ -37,6 +38,7 @@ function App() {
           <Route path="blog-categories" element={<BlogCategoriesPage />} />
           <Route path="project-categories" element={<ProjectCategoriesPage />} />
           <Route path="technology-categories" element={<TechnologyCategoriesPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </Router>

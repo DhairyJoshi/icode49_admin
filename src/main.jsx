@@ -5,13 +5,16 @@ import App from './App.jsx'
 import { Provider } from 'react-redux'
 import store from './store'
 import { AuthProvider } from './AuthContext'
+import { NotificationProvider } from './components/NotificationProvider'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
       <AuthProvider>
-        <App />
+        <NotificationProvider>
+          <App />
+        </NotificationProvider>
       </AuthProvider>
     </Provider>
-  </StrictMode>,
+  </StrictMode>
 )

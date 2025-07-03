@@ -2,31 +2,37 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { loginAPI } from '../api'
+import { useContext } from 'react'
+import { NotificationContext } from '../components/NotificationProvider'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [remember, setRemember] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const { showNotification } = useContext(NotificationContext)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError('')
     setLoading(true)
     try {
       const data = await loginAPI(username, password)
       if (data.status === 'true' || data.statuscode === 200) {
-        login({ username: username, role: 'Administrator', token: data.token })
+        login({
+          ...data.data,
+          token: data.token || data.data.token,
+          username: username
+        })
+        showNotification({ message: 'Login successful!', type: 'success' })
         navigate('/')
       } else {
-        setError(data.message || 'Invalid username or password')
+        showNotification({ message: data.message || 'Invalid username or password', type: 'error' })
       }
     } catch (err) {
-      setError('Network error')
+      showNotification({ message: 'Network error', type: 'error' })
     } finally {
       setLoading(false)
     }
@@ -40,7 +46,7 @@ export default function LoginPage() {
           <img src="/images/login_bg.svg" alt="Illustration" className="w-48 h-48 lg:w-72 lg:h-72 object-contain mx-auto" />
           <div className="mt-6 lg:mt-8 text-center">
             <h2 className="text-xl lg:text-2xl font-bold text-pink-600 mb-2">Turn your ideas into reality.</h2>
-            <p className="text-pink-700 text-sm lg:text-base">Start for free and get attractive offers from the community</p>
+            <p className="text-pink-700 text-sm lg:text-base">Login to access icode49's admin panel</p>
           </div>
         </div>
         {/* Right Login Form */}
@@ -53,7 +59,6 @@ export default function LoginPage() {
             <p className="text-gray-500 text-xs sm:text-sm">See what is going on with your business</p>
           </div>
           <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
-            {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
             <div className="mb-4">
               <label className="block mb-1 text-gray-700">Email</label>
               <input
@@ -117,10 +122,6 @@ export default function LoginPage() {
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
-          <div className="text-center mt-6 text-gray-600 text-sm">
-            Not Registered Yet?{' '}
-            <button className="text-pink-600 font-medium hover:underline" type="button">Create an account</button>
-          </div>
         </div>
       </div>
     </div>

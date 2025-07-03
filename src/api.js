@@ -1,23 +1,11 @@
-// Blog APIs
-export async function fetchBlogsAPI() {
-  const res = await fetch('https://dummyjson.com/posts')
-  const data = await res.json()
-  return data.posts
-}
-
-// Project APIs
-export async function fetchProjectsAPI() {
-  const res = await fetch('https://dummyjson.com/products')
-  const data = await res.json()
-  return data.products
-}
+const BASE_API_URL = 'http://164.52.202.121:4545/api/'
 
 // Auth API
 export async function loginAPI(email, password) {
   const formData = new FormData();
   formData.append('email', email);
   formData.append('password', password);
-  const res = await fetch('http://164.52.202.121:4545/api/admin_login/', {
+  const res = await fetch(`${BASE_API_URL}admin_login/`, {
     method: 'POST',
     body: formData,
   });
@@ -28,7 +16,7 @@ export async function loginAPI(email, password) {
 export async function blogCategoryCreateAPI(category) {
   const formData = new FormData();
   formData.append('category', category);
-  const res = await fetch('http://164.52.202.121:4545/api/blog_category_create/', {
+  const res = await fetch(`${BASE_API_URL}blog_category_create/`, {
     method: 'POST',
     body: formData,
   });
@@ -37,7 +25,7 @@ export async function blogCategoryCreateAPI(category) {
 
 // All Blog Categories API
 export async function allBlogCategoryAPI() {
-  const res = await fetch('http://164.52.202.121:4545/api/all_blog_category/', {
+  const res = await fetch(`${BASE_API_URL}all_blog_category/`, {
     method: 'POST',
   });
   return res.json();
@@ -67,7 +55,7 @@ export async function blogCreateAPI({
   formData.append('og_type', og_type);
   formData.append('og_image_alt', og_image_alt);
 
-  const res = await fetch('http://164.52.202.121:4545/api/blog_create/', {
+  const res = await fetch(`${BASE_API_URL}blog_create/`, {
     method: 'POST',
     body: formData,
   });
@@ -76,14 +64,14 @@ export async function blogCreateAPI({
 
 // All Blog List API
 export async function allBlogListAPI() {
-  const res = await fetch('http://164.52.202.121:4545/api/all_blog_list/', {
+  const res = await fetch(`${BASE_API_URL}all_blog_list/`, {
     method: 'POST',
   });
   return res.json();
 }
 
 export async function allPortfolioCategoryAPI() {
-  const res = await fetch('http://164.52.202.121:4545/api/all_portfolio_category/', {
+  const res = await fetch(`${BASE_API_URL}all_portfolio_category/`, {
     method: 'POST',
   });
   return res.json();
@@ -93,7 +81,7 @@ export async function allPortfolioCategoryAPI() {
 export async function portfolioCategoryCreateAPI(category) {
   const formData = new FormData();
   formData.append('category', category);
-  const res = await fetch('http://164.52.202.121:4545/api/portfolio_category_create/', {
+  const res = await fetch(`${BASE_API_URL}portfolio_category_create/`, {
     method: 'POST',
     body: formData,
   });
@@ -101,7 +89,7 @@ export async function portfolioCategoryCreateAPI(category) {
 }
 
 export async function allTechnologyCategoryAPI() {
-  const res = await fetch('http://164.52.202.121:4545/api/all_technology/', {
+  const res = await fetch(`${BASE_API_URL}all_technology/`, {
     method: 'POST',
   });
   return res.json();
@@ -111,7 +99,7 @@ export async function allTechnologyCategoryAPI() {
 export async function technologyCategoryCreateAPI(category) {
   const formData = new FormData();
   formData.append('category', category);
-  const res = await fetch('http://164.52.202.121:4545/api/technology_create/', {
+  const res = await fetch(`${BASE_API_URL}technology_create/`, {
     method: 'POST',
     body: formData,
   });
@@ -123,7 +111,7 @@ export async function technologyCreateAPI({ title, image }) {
   const formData = new FormData();
   formData.append('title', title);
   if (image) formData.append('image', image);
-  const res = await fetch('http://164.52.202.121:4545/api/technology_create/', {
+  const res = await fetch(`${BASE_API_URL}technology_create/`, {
     method: 'POST',
     body: formData,
   });
@@ -132,7 +120,7 @@ export async function technologyCreateAPI({ title, image }) {
 
 // All Technology API
 export async function allTechnologyAPI() {
-  const res = await fetch('http://164.52.202.121:4545/api/all_technology/', {
+  const res = await fetch(`${BASE_API_URL}all_technology/`, {
     method: 'POST',
   });
   return res.json();
@@ -148,9 +136,9 @@ export async function portfolioCreateAPI({ category, title, description, project
   formData.append('website_link', website_link);
   if (image) formData.append('image', image);
   if (Array.isArray(technology)) {
-    technology.forEach(id => formData.append('technology', id));
+    formData.append('technology', JSON.stringify(technology));
   }
-  const res = await fetch('http://164.52.202.121:4545/api/portfolio_create/', {
+  const res = await fetch(`${BASE_API_URL}portfolio_create/`, {
     method: 'POST',
     body: formData,
   });
@@ -159,7 +147,7 @@ export async function portfolioCreateAPI({ category, title, description, project
 
 // All Portfolio List API
 export async function allPortfolioListAPI() {
-  const res = await fetch('http://164.52.202.121:4545/api/all_portfolio_list/', {
+  const res = await fetch(`${BASE_API_URL}all_portfolio_list/`, {
     method: 'POST',
   });
   return res.json();
@@ -175,9 +163,9 @@ export async function portfolioUpdateAPI({ id, category, title, description, pro
   formData.append('website_link', website_link);
   if (image) formData.append('image', image);
   if (Array.isArray(technology)) {
-    technology.forEach(id => formData.append('technology', id));
+    formData.append('technology', JSON.stringify(technology));
   }
-  const res = await fetch('http://164.52.202.121:4545/api/portfolio_update/', {
+  const res = await fetch(`${BASE_API_URL}portfolio_update/`, {
     method: 'POST',
     body: formData,
   });

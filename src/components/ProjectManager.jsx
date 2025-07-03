@@ -48,6 +48,7 @@ function ProjectManager() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log(formData)
     if (editingProject) {
       dispatch(updateProject({
         id: editingProject.id || editingProject._id,
@@ -82,7 +83,7 @@ function ProjectManager() {
 
   const handleTechChange = (e) => {
     const options = Array.from(e.target.selectedOptions)
-    setFormData({ ...formData, technology: options.map(opt => opt.value) })
+    setFormData({ ...formData, technology: options.map(opt => parseInt(opt.value, 10)) })
   }
 
   const openEditDrawer = (project) => {
@@ -174,7 +175,14 @@ function ProjectManager() {
                     <td className="px-6 py-4 whitespace-nowrap">{project.title}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{project.category_name || project.category}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {(project.technology_names || project.technology || []).join(', ')}
+                      {Array.isArray(project.technology)
+                        ? project.technology
+                            .map(id => {
+                              const tech = technologies.find(t => (t.id || t._id || t.technology) == id);
+                              return tech ? (tech.technology || tech.name || tech.title) : id;
+                            })
+                            .join(', ')
+                        : (project.technology_names || project.technology || []).join(', ')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">{project.project_duration}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -233,7 +241,7 @@ function ProjectManager() {
                   onChange={e => setFormData({ ...formData, category: e.target.value })}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300"
                 >
-                  <option value="">Select category</option>
+                  <option disabled value="">Select category</option>
                   {categories.map(cat => (
                     <option key={cat.id || cat._id || cat.category} value={cat.id || cat._id || cat.category}>
                       {cat.category || cat.name}
