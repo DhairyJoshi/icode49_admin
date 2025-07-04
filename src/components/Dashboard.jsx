@@ -81,7 +81,7 @@ function Dashboard() {
               className="bg-white shadow rounded-lg"
             >
               <div className="p-5 flex items-center">
-                <div className={`flex-shrink-0 rounded-full ${stat.color} flex items-center justify-center h-16 w-16`}>
+                <div className={`flex-shrink-0 rounded-lg ${stat.color} flex items-center justify-center h-16 w-16`}>
                   <stat.icon className={`h-10 w-10 ${stat.iconColor}`} />
                 </div>
                 <div className="ml-5 w-0 flex-1">

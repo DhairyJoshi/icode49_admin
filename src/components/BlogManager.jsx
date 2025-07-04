@@ -81,6 +81,7 @@ function BlogManager() {
         author: formData.author,
         publish_date: formData.publish_date,
         read_time: formData.read_time,
+        status: formData.status,
         seo_title: formData.seo_title,
         seo_description: formData.seo_description,
         seo_keywords: formData.seo_keywords,
@@ -110,6 +111,7 @@ function BlogManager() {
         author: formData.author,
         publish_date: formData.publish_date,
         read_time: formData.read_time,
+        status: formData.status,
         seo_title: formData.seo_title,
         seo_description: formData.seo_description,
         seo_keywords: formData.seo_keywords,
@@ -414,9 +416,8 @@ function BlogManager() {
                         className="w-full px-4 py-3 rounded-lg border border-gray-300"
                       >
                         <option value="" disabled>Select status</option>
-                        <option value="Draft">Draft</option>
-                        <option value="Published">Published</option>
-                        <option value="Archived">Archived</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
                       </select>
                     </div>
                     {/* SEO Title */}

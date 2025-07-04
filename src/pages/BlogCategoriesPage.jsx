@@ -52,6 +52,7 @@ function BlogCategoriesPage() {
             <tr>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category Name</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -59,6 +60,11 @@ function BlogCategoriesPage() {
               <tr key={typeof cat === 'string' ? cat : cat.id || cat.category}>
                 <td className="px-4 py-2">{idx + 1}</td>
                 <td className="px-4 py-2">{typeof cat === 'string' ? cat : cat.category || cat.name}</td>
+                <td className="px-4 py-2">
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${cat.status === 'inactive' ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-700'}`}>
+                    {cat.status === 'inactive' ? 'Inactive' : 'Active'}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>

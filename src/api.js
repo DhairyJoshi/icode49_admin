@@ -33,7 +33,7 @@ export async function allBlogCategoryAPI() {
 
 // Blog Create API
 export async function blogCreateAPI({
-  category, title, poster, poster_alt, image, image_alt, description, author, publish_date, read_time, seo_title, seo_description, seo_keywords, og_title, og_description, og_image, og_type, og_image_alt
+  category, title, poster, poster_alt, image, image_alt, description, author, publish_date, read_time, status, seo_title, seo_description, seo_keywords, og_title, og_description, og_image, og_type, og_image_alt
 }) {
   const formData = new FormData();
   formData.append('category', category);
@@ -46,6 +46,7 @@ export async function blogCreateAPI({
   formData.append('author', author);
   formData.append('publish_date', publish_date);
   formData.append('read_time', read_time);
+  if (status) formData.append('status', status);
   formData.append('seo_title', seo_title);
   formData.append('seo_description', seo_description);
   formData.append('seo_keywords', seo_keywords);
@@ -175,7 +176,7 @@ export async function portfolioUpdateAPI({ id, category, title, description, pro
 }
 
 // Blog Update API
-export async function blogUpdateAPI({ id, category, title, poster, poster_alt, image, image_alt, description, author, publish_date, read_time, seo_title, seo_description, seo_keywords, og_title, og_description, og_image, og_type, og_image_alt }) {
+export async function blogUpdateAPI({ id, category, title, poster, poster_alt, image, image_alt, description, author, publish_date, read_time, status, seo_title, seo_description, seo_keywords, og_title, og_description, og_image, og_type, og_image_alt }) {
   const formData = new FormData();
   formData.append('id', id);
   formData.append('category', category);
@@ -188,6 +189,7 @@ export async function blogUpdateAPI({ id, category, title, poster, poster_alt, i
   formData.append('author', author);
   formData.append('publish_date', publish_date);
   formData.append('read_time', read_time);
+  if (status) formData.append('status', status);
   formData.append('seo_title', seo_title);
   formData.append('seo_description', seo_description);
   formData.append('seo_keywords', seo_keywords);

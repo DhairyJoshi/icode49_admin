@@ -8,13 +8,11 @@ import { AuthProvider } from './AuthContext'
 import { NotificationProvider } from './components/NotificationProvider'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <Provider store={store}>
-      <AuthProvider>
-        <NotificationProvider>
-          <App />
-        </NotificationProvider>
-      </AuthProvider>
-    </Provider>
-  </StrictMode>
+  <Provider store={store}>
+    <AuthProvider>
+      <NotificationProvider>
+        <App />
+      </NotificationProvider>
+    </AuthProvider>
+  </Provider>
 )

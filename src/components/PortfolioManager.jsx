@@ -9,7 +9,7 @@ import { NotificationContext } from './NotificationProvider'
 
 function PortfolioManager() {
   const dispatch = useDispatch()
-  const { items: portfolios, createStatus, createError, createSuccess, updateStatus, updateError, updateSuccess } = useSelector(state => state.portfolio)
+  const { items: portfolios, createStatus, updateStatus } = useSelector(state => state.portfolio)
   const [showDrawer, setShowDrawer] = useState(false)
   const [formData, setFormData] = useState({
     category: '',
