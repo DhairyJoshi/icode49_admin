@@ -37,11 +37,11 @@ function Layout() {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'Blogs', href: '/blogs', icon: DocumentTextIcon },
-    { name: 'Projects', href: '/projects', icon: FolderIcon },
+    { name: 'Portfolios', href: '/portfolios', icon: FolderIcon },
   ]
   const master = [
     { name: 'Blog Categories', href: '/blog-categories', icon: ClipboardDocumentListIcon },
-    { name: 'Project Categories', href: '/project-categories', icon: AdjustmentsHorizontalIcon },
+    { name: 'Portfolio Categories', href: '/portfolio-categories', icon: AdjustmentsHorizontalIcon },
     { name: 'Technology Categories', href: '/technology-categories', icon: Square3Stack3DIcon },
   ]
   return (

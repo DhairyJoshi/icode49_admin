@@ -6,7 +6,7 @@ function BreadCrumb({ bannerOpen }) {
   const pathNameMap = {
     '/': 'Home',
     '/blogs': 'Blogs',
-    '/projects': 'Projects',
+    '/portfolios': 'Portfolios',
     '/blog-categories': 'Blog Categories',
     '/project-categories': 'Project Categories',
     '/technology-categories': 'Technology Categories',

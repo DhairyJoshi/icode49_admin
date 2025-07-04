@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { allPortfolioCategoryAPI, portfolioCategoryCreateAPI } from '../api'
 
-export const fetchProjectCategories = createAsyncThunk('projectCategories/fetchProjectCategories', async (_, { rejectWithValue }) => {
+export const fetchPortfolioCategories = createAsyncThunk('portfolioCategories/fetchPortfolioCategories', async (_, { rejectWithValue }) => {
   try {
     const res = await allPortfolioCategoryAPI()
     if (res.status === 'true' || res.statuscode === 200) {
@@ -14,7 +14,7 @@ export const fetchProjectCategories = createAsyncThunk('projectCategories/fetchP
   }
 })
 
-export const createProjectCategory = createAsyncThunk('projectCategories/createProjectCategory', async (category, { rejectWithValue }) => {
+export const createPortfolioCategory = createAsyncThunk('portfolioCategories/createPortfolioCategory', async (category, { rejectWithValue }) => {
   try {
     const res = await portfolioCategoryCreateAPI(category)
     if (res.status === 'true' || res.statuscode === 200) {
@@ -27,8 +27,8 @@ export const createProjectCategory = createAsyncThunk('projectCategories/createP
   }
 })
 
-const projectCategoriesSlice = createSlice({
-  name: 'projectCategories',
+const portfolioCategoriesSlice = createSlice({
+  name: 'portfolioCategories',
   initialState: {
     items: [],
     status: 'idle',
@@ -40,31 +40,31 @@ const projectCategoriesSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchProjectCategories.pending, (state) => {
+      .addCase(fetchPortfolioCategories.pending, (state) => {
         state.status = 'loading'
       })
-      .addCase(fetchProjectCategories.fulfilled, (state, action) => {
+      .addCase(fetchPortfolioCategories.fulfilled, (state, action) => {
         state.status = 'succeeded'
         state.items = action.payload
       })
-      .addCase(fetchProjectCategories.rejected, (state, action) => {
+      .addCase(fetchPortfolioCategories.rejected, (state, action) => {
         state.status = 'failed'
         state.error = action.payload || action.error.message
       })
-      .addCase(createProjectCategory.pending, (state) => {
+      .addCase(createPortfolioCategory.pending, (state) => {
         state.createStatus = 'loading'
         state.createError = null
         state.createSuccess = null
       })
-      .addCase(createProjectCategory.fulfilled, (state, action) => {
+      .addCase(createPortfolioCategory.fulfilled, (state, action) => {
         state.createStatus = 'succeeded'
         state.createSuccess = 'Category added successfully!'
       })
-      .addCase(createProjectCategory.rejected, (state, action) => {
+      .addCase(createPortfolioCategory.rejected, (state, action) => {
         state.createStatus = 'failed'
         state.createError = action.payload || action.error.message
       })
   },
 })
 
-export default projectCategoriesSlice.reducer 
+export default portfolioCategoriesSlice.reducer 

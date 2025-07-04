@@ -127,7 +127,7 @@ export async function allTechnologyAPI() {
 }
 
 // Portfolio Create API
-export async function portfolioCreateAPI({ category, title, description, project_duration, website_link, image, image_alt, technology }) {
+export async function portfolioCreateAPI({ category, title, description, project_duration, website_link, image, technology }) {
   const formData = new FormData();
   formData.append('category', category);
   formData.append('title', title);
@@ -135,17 +135,15 @@ export async function portfolioCreateAPI({ category, title, description, project
   formData.append('project_duration', project_duration);
   formData.append('website_link', website_link);
   if (image) {
-    formData.append('image', image); 
-    formData.append('image_alt', image_alt);
+    formData.append('image', image);
   }
-  if (Array.isArray(technology)) {
-    formData.append('technology', JSON.stringify(technology));
+  if (technology) {
+    formData.append('technology', JSON.stringify(Array.isArray(technology) ? technology : [technology]));
   }
-  const res = await fetch(`${BASE_API_URL}portfolio_create/`, {
+  return fetch('http://164.52.202.121:4545/api/portfolio_create/', {
     method: 'POST',
     body: formData,
-  });
-  return res.json();
+  }).then(res => res.json());
 }
 
 // All Portfolio List API
@@ -166,16 +164,14 @@ export async function portfolioUpdateAPI({ id, category, title, description, pro
   formData.append('website_link', website_link);
   if (image) {
     formData.append('image', image);
-    formData.append('image_alt', image_alt);
   }
-  if (Array.isArray(technology)) {
-    formData.append('technology', JSON.stringify(technology));
+  if (technology) {
+    formData.append('technology', JSON.stringify(Array.isArray(technology) ? technology : [technology]));
   }
-  const res = await fetch(`${BASE_API_URL}portfolio_update/`, {
+  return fetch(`${BASE_API_URL}portfolio_update/`, {
     method: 'POST',
     body: formData,
-  });
-  return res.json();
+  }).then(res => res.json());
 }
 
 // Blog Update API

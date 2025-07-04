@@ -1,29 +1,29 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { fetchProjectCategories, createProjectCategory } from '../slices/projectCategoriesSlice'
+import { fetchPortfolioCategories, createPortfolioCategory } from '../slices/portfolioCategoriesSlice'
 
-function ProjectCategoriesPage() {
+function PortfolioCategoriesPage() {
   const dispatch = useDispatch()
-  const { items: categories, status, error, createStatus, createError, createSuccess } = useSelector(state => state.projectCategories)
+  const { items: categories, status, error, createStatus, createError, createSuccess } = useSelector(state => state.portfolioCategories)
   const [newCategory, setNewCategory] = useState('')
 
   React.useEffect(() => {
-    dispatch(fetchProjectCategories())
+    dispatch(fetchPortfolioCategories())
   }, [dispatch])
 
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return
-    dispatch(createProjectCategory(newCategory.trim())).then((action) => {
+    dispatch(createPortfolioCategory(newCategory.trim())).then((action) => {
       if (action.type.endsWith('fulfilled')) {
         setNewCategory('')
-        dispatch(fetchProjectCategories())
+        dispatch(fetchPortfolioCategories())
       }
     })
   }
 
   return (
     <div className="mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Project Categories</h2>
+      <h2 className="text-xl font-bold mb-4">Portfolio Categories</h2>
       <div className="flex mb-4">
         <input
           type="text"
@@ -68,4 +68,4 @@ function ProjectCategoriesPage() {
   )
 }
 
-export default ProjectCategoriesPage 
+export default PortfolioCategoriesPage

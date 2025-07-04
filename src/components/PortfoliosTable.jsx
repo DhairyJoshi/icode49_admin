@@ -7,7 +7,7 @@ function getSortIcon(column, sortBy, sortDir) {
   return sortDir === "asc" ? "▲" : "▼";
 }
 
-export default function ProjectsTable({ projects, technologies = [], categories = [], onEdit, onView, onDelete }) {
+export default function PortfoliosTable({ portfolios, technologies = [], categories = [], onEdit, onView, onDelete }) {
   const [sortBy, setSortBy] = useState("title");
   const [sortDir, setSortDir] = useState("asc");
   const [selected, setSelected] = useState([]);
@@ -23,10 +23,10 @@ export default function ProjectsTable({ projects, technologies = [], categories 
   const tableContainerRef = useRef(null);
 
   // Get unique category IDs for dropdown
-  const uniqueCategoryIds = Array.from(new Set(projects.map(project => {
-    if (project.category_name) return null; // prefer not to show if name is present
-    if (typeof project.category === 'object' && project.category !== null) return project.category.id || project.category._id || project.category.category;
-    return project.category;
+  const uniqueCategoryIds = Array.from(new Set(portfolios.map(portfolio => {
+    if (portfolio.category_name) return null; // prefer not to show if name is present
+    if (typeof portfolio.category === 'object' && portfolio.category !== null) return portfolio.category.id || portfolio.category._id || portfolio.category.category;
+    return portfolio.category;
   }))).filter(Boolean);
 
   // Close dropdowns when clicking outside
@@ -71,7 +71,7 @@ export default function ProjectsTable({ projects, technologies = [], categories 
     }
   };
 
-  const sortedProjects = [...projects].sort((a, b) => {
+  const sortedPortfolios = [...portfolios].sort((a, b) => {
     let valA, valB;
     if (sortBy === "title") {
       valA = a.title?.toLowerCase() || "";
@@ -91,20 +91,20 @@ export default function ProjectsTable({ projects, technologies = [], categories 
   });
 
   // Filtering
-  const filteredProjects = sortedProjects.filter(project => {
+  const filteredPortfolios = sortedPortfolios.filter(portfolio => {
     const q = search.toLowerCase();
     const matchesSearch =
-      project.title?.toLowerCase().includes(q) ||
-      (project.category_name || project.category)?.toLowerCase().includes(q) ||
-      project.description?.toLowerCase().includes(q) ||
-      project.project_duration?.toLowerCase().includes(q);
-    const matchesCategory = categoryFilter && categoryFilter !== "all" ? (project.category_name || project.category) === categoryFilter : true;
+      portfolio.title?.toLowerCase().includes(q) ||
+      (portfolio.category_name || portfolio.category)?.toLowerCase().includes(q) ||
+      portfolio.description?.toLowerCase().includes(q) ||
+      portfolio.project_duration?.toLowerCase().includes(q);
+    const matchesCategory = categoryFilter && categoryFilter !== "all" ? (portfolio.category_name || portfolio.category) === categoryFilter : true;
     return matchesSearch && matchesCategory;
   });
 
-  const totalPages = Math.ceil(filteredProjects.length / pageSize);
-  const paginatedProjects = filteredProjects.slice((page - 1) * pageSize, page * pageSize);
-  const rowsEnd = Math.min(page * pageSize, filteredProjects.length);
+  const totalPages = Math.ceil(filteredPortfolios.length / pageSize);
+  const paginatedPortfolios = filteredPortfolios.slice((page - 1) * pageSize, page * pageSize);
+  const rowsEnd = Math.min(page * pageSize, filteredPortfolios.length);
 
   // Reset to page 1 if filters/search change and current page is out of range
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function ProjectsTable({ projects, technologies = [], categories 
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelected(filteredProjects.map(project => project.id || project._id));
+      setSelected(filteredPortfolios.map(portfolio => portfolio.id || portfolio._id));
     } else {
       setSelected([]);
     }
@@ -131,7 +131,7 @@ export default function ProjectsTable({ projects, technologies = [], categories 
     <div className="my-5 relative rounded-t-lg shadow-md bg-white">
       <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-3 pb-1 mb-4">
         <div className="text-2xl">
-          {selected.length > 0 ? `${selected.length} selected` : "Projects"}
+          {selected.length > 0 ? `${selected.length} selected` : "Portfolios"}
         </div>
         <div className="flex gap-2 items-center ms-auto">
           <div className="relative w-48" ref={categoryDropdownRef}>
@@ -193,9 +193,9 @@ export default function ProjectsTable({ projects, technologies = [], categories 
             </div>
             <input
               type="text"
-              id="table-search-projects"
+              id="table-search-portfolios"
               className="mt-2 w-full h-[3.15rem] pl-12 pr-12 text-[1.063rem] font-normal text-[#333] border border-[#C7BEBE] border-b-[0.156rem] rounded-lg bg-transparent transition-all duration-300 ease-in-out focus:border-pink-600 hover:border-pink-600 focus:outline-none placeholder-gray-400"
-              placeholder="Search for projects"
+              placeholder="Search for portfolios"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -213,7 +213,28 @@ export default function ProjectsTable({ projects, technologies = [], categories 
           </div>
         </div>
       </div>
-      <div className="overflow-x-auto relative" ref={tableContainerRef}>
+      <div
+        className="overflow-x-auto relative scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-pink-100 hover:scrollbar-thumb-pink-400 scrollbar-thumb-rounded-full scrollbar-track-rounded-full border border-gray-200 rounded-lg"
+        style={{ scrollbarColor: '#f9a8d4 #fce7f3', scrollbarWidth: 'thin', minHeight: '2.5rem' }}
+        ref={tableContainerRef}
+      >
+        <style>{`
+          .scrollbar-thin::-webkit-scrollbar {
+            height: 12px;
+          }
+          .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #f9a8d4;
+            border-radius: 8px;
+            border: 2px solid #fce7f3;
+          }
+          .scrollbar-thin::-webkit-scrollbar-track {
+            background: #fce7f3;
+            border-radius: 8px;
+          }
+          .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+            background: #f472b6;
+          }
+        `}</style>
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 min-w-[1200px] table-fixed">
           <thead className="text-xs text-gray-700 uppercase bg-transparent border-b border-gray-400/60">
             <tr>
@@ -221,7 +242,7 @@ export default function ProjectsTable({ projects, technologies = [], categories 
                 <div className="flex items-center">
                   <Checkbox
                     id="checkbox-all-search"  
-                    checked={filteredProjects.length > 0 && filteredProjects.every(project => selected.includes(project.id || project._id))}
+                    checked={filteredPortfolios.length > 0 && filteredPortfolios.every(portfolio => selected.includes(portfolio.id || portfolio._id))}
                     onChange={handleSelectAll}
                   />
                 </div>
@@ -237,33 +258,33 @@ export default function ProjectsTable({ projects, technologies = [], categories 
             </tr>
           </thead>
           <tbody>
-            {paginatedProjects.map((project) => (
-              <tr key={project.id || project._id} className={`group ${selected.includes(project.id || project._id) ? 'bg-pink-100 hover:bg-pink-200' : 'bg-transparent hover:bg-pink-100'}`}>
+            {paginatedPortfolios.map((portfolio) => (
+              <tr key={portfolio.id || portfolio._id} className={`group ${selected.includes(portfolio.id || portfolio._id) ? 'bg-pink-100 hover:bg-pink-200' : 'bg-transparent hover:bg-pink-100'}`}>
                 <td className="w-16 p-4">
                   <div className="flex items-center">
                     <Checkbox
-                      id={`checkbox-table-search-${project.id || project._id}`}
-                      checked={selected.includes(project.id || project._id)}
-                      onChange={() => handleSelect(project.id || project._id)}
+                      id={`checkbox-table-search-${portfolio.id || portfolio._id}`}
+                      checked={selected.includes(portfolio.id || portfolio._id)}
+                      onChange={() => handleSelect(portfolio.id || portfolio._id)}
                     />
                   </div>
                 </td>
                 <td className="w-48 px-6 py-4 text-gray-900">
-                  <div className="text-sm font-medium break-words min-w-0 w-full">{project.title}</div>
+                  <div className="text-sm font-medium break-words min-w-0 w-full">{portfolio.title}</div>
                 </td>
-                <td className="w-64 px-6 py-4 max-w-xs truncate" title={project.description}>{project.description}</td>
+                <td className="w-64 px-6 py-4 max-w-xs truncate" title={portfolio.description}>{portfolio.description}</td>
                 <td className="w-40 px-6 py-4">{
                   (() => {
                     // Prefer category_name if present
-                    if (project.category_name) return project.category_name;
-                    // If project.category is an object with a name
-                    if (typeof project.category === 'object' && project.category !== null) {
-                      return project.category.name || project.category.title || project.category.category || '';
+                    if (portfolio.category_name) return portfolio.category_name;
+                    // If portfolio.category is an object with a name
+                    if (typeof portfolio.category === 'object' && portfolio.category !== null) {
+                      return portfolio.category.name || portfolio.category.title || portfolio.category.category || '';
                     }
-                    // If project.category is an ID, map to name
-                    if (project.category) {
-                      const cat = categories.find(c => (c.id || c._id || c.category) == project.category);
-                      return cat ? (cat.category || cat.name || cat.title) : project.category;
+                    // If portfolio.category is an ID, map to name
+                    if (portfolio.category) {
+                      const cat = categories.find(c => (c.id || c._id || c.category) == portfolio.category);
+                      return cat ? (cat.category || cat.name || cat.title) : portfolio.category;
                     }
                     return '';
                   })()
@@ -272,18 +293,18 @@ export default function ProjectsTable({ projects, technologies = [], categories 
                   <div className="flex flex-wrap gap-1">
                     {(() => {
                       let techNames = [];
-                      if (Array.isArray(project.technology)) {
+                      if (Array.isArray(portfolio.technology)) {
                         // If technology is an array of IDs, map them to names
-                        techNames = project.technology.map(techId => {
+                        techNames = portfolio.technology.map(techId => {
                           const tech = technologies.find(t => (t.id || t._id || t.technology) == techId);
                           return tech ? (tech.technology || tech.name || tech.title) : techId;
                         });
-                      } else if (project.technology_names) {
+                      } else if (portfolio.technology_names) {
                         // If technology_names is already provided
-                        techNames = project.technology_names;
-                      } else if (project.technology) {
+                        techNames = portfolio.technology_names;
+                      } else if (portfolio.technology) {
                         // Fallback to technology field
-                        techNames = Array.isArray(project.technology) ? project.technology : [project.technology];
+                        techNames = Array.isArray(portfolio.technology) ? portfolio.technology : [portfolio.technology];
                       }
                       
                       return (
@@ -303,16 +324,16 @@ export default function ProjectsTable({ projects, technologies = [], categories 
                     })()}
                   </div>
                 </td>
-                <td className="w-40 px-6 py-4">{project.project_duration}</td>
+                <td className="w-40 px-6 py-4">{portfolio.project_duration}</td>
                 <td className="w-40 px-6 py-4">
-                  {project.image && (
-                    <img src={`${IMAGE_BASE_URL}${project.image}`} alt={project.image_alt || 'Project'} className="h-12 w-20 object-cover rounded" />
+                  {portfolio.image && (
+                    <img src={`${IMAGE_BASE_URL}${portfolio.image}`} alt={portfolio.image_alt || 'Portfolio'} className="h-12 w-20 object-cover rounded" />
                   )}
                 </td>
                 <td className="w-40 px-6 py-4">
-                  {project.website_link && (
+                  {portfolio.website_link && (
                     <a 
-                      href={project.website_link} 
+                      href={portfolio.website_link} 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="text-blue-600 hover:text-blue-800 underline"
@@ -321,14 +342,14 @@ export default function ProjectsTable({ projects, technologies = [], categories 
                     </a>
                   )}
                 </td>
-                <td className={`w-32 px-6 py-4 sticky right-0 ${selected.includes(project.id || project._id) ? 'bg-pink-100 group-hover:bg-pink-200' : 'bg-white group-hover:bg-pink-100'}`}>
+                <td className={`w-32 px-6 py-4 sticky right-0 ${selected.includes(portfolio.id || portfolio._id) ? 'bg-pink-100 group-hover:bg-pink-200' : 'bg-white group-hover:bg-pink-100'}`}>
                   <div className="flex items-center gap-2">
                     {/* Edit */}
-                    <button type="button" title="Edit Project" onClick={() => onEdit && onEdit(project)}>
+                    <button type="button" title="Edit Portfolio" onClick={() => onEdit && onEdit(portfolio)}>
                       <PencilIcon className="h-5 w-5 text-pink-600" />
                     </button>
                     {/* View */}
-                    <button type="button" title="View Project" onClick={() => onView && onView(project)}>
+                    <button type="button" title="View Portfolio" onClick={() => onView && onView(portfolio)}>
                       <lord-icon
                         src="https://cdn.lordicon.com/dicvhxpz.json"
                         trigger="hover"
@@ -338,7 +359,7 @@ export default function ProjectsTable({ projects, technologies = [], categories 
                       </lord-icon>
                     </button>
                     {/* Delete */}
-                    <button type="button" title="Delete Project" onClick={() => onDelete && onDelete(project)}>
+                    <button type="button" title="Delete Portfolio" onClick={() => onDelete && onDelete(portfolio)}>
                       <lord-icon
                         src="https://cdn.lordicon.com/jzinekkv.json"
                         trigger="hover"
@@ -351,9 +372,9 @@ export default function ProjectsTable({ projects, technologies = [], categories 
                 </td>
               </tr>
             ))}
-            {filteredProjects.length === 0 && (
+            {filteredPortfolios.length === 0 && (
               <tr>
-                <td colSpan={9} className="text-center py-8 text-gray-400">No projects found.</td>
+                <td colSpan={9} className="text-center py-8 text-gray-400">No portfolios found.</td>
               </tr>
             )}
           </tbody>
@@ -363,7 +384,7 @@ export default function ProjectsTable({ projects, technologies = [], categories 
       <div className="w-full border border-white flex items-center justify-between px-6 py-4 bg-white rounded-b-lg overflow-visible absolute z-20">
         {/* Left: Showing X out of Y */}
         <div className="text-gray-800 text-base">
-          Showing {filteredProjects.length === 0 ? 0 : rowsEnd} out of {filteredProjects.length}
+          Showing {filteredPortfolios.length === 0 ? 0 : rowsEnd} out of {filteredPortfolios.length}
         </div>
         {/* Center: Pagination */}
         <div className="flex items-center gap-2">

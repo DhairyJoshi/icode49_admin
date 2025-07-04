@@ -2,17 +2,17 @@ import { configureStore } from '@reduxjs/toolkit'
 import blogsReducer from './slices/blogsSlice'
 import blogCategoriesReducer from './slices/blogCategoriesSlice'
 import technologyCategoriesReducer from './slices/technologyCategoriesSlice'
-import projectCategoriesReducer from './slices/projectCategoriesSlice'
-import projectReducer from './slices/projectSlice'
+import portfolioCategoriesReducer from './slices/portfolioCategoriesSlice'
+import portfolioReducer from './slices/portfolioSlice'
 
 const store = configureStore({
   reducer: {
     blogs: blogsReducer,
     blogCategories: blogCategoriesReducer,
     technologyCategories: technologyCategoriesReducer,
-    projectCategories: projectCategoriesReducer,
-    project: projectReducer,
+    portfolioCategories: portfolioCategoriesReducer,
+    portfolio: portfolioReducer,
   },
 })
 
-export default store 
+export default store

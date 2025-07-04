@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import {
   DocumentTextIcon,
   FolderIcon,
-  CalendarIcon
+  CalendarIcon,
+  EyeIcon,
+  ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom';
 
@@ -37,29 +39,33 @@ function Dashboard() {
     {
       name: 'Total Blogs',
       value: stats.totalBlogs,
-      img: '/images/blog.png',
-      color: 'bg-blue-500',
+      icon: DocumentTextIcon,
+      color: 'bg-blue-100',
+      iconColor: 'text-blue-500',
       textColor: 'text-blue-600'
     },
     {
       name: 'Total Projects',
       value: stats.totalProjects,
-      img: '/images/project.png',
-      color: 'bg-green-500',
+      icon: FolderIcon,
+      color: 'bg-green-100',
+      iconColor: 'text-green-500',
       textColor: 'text-green-600'
     },
     {
       name: 'Total Views',
       value: stats.totalViews.toLocaleString(),
-      img: '/images/views.png',
-      color: 'bg-purple-500',
+      icon: EyeIcon,
+      color: 'bg-purple-100',
+      iconColor: 'text-purple-500',
       textColor: 'text-purple-600'
     },
     {
       name: 'Growth Rate',
       value: '+12%',
-      img: '/images/growth.png',
-      color: 'bg-orange-500',
+      icon: ArrowTrendingUpIcon,
+      color: 'bg-orange-100',
+      iconColor: 'text-orange-500',
       textColor: 'text-orange-600'
     }
   ]
@@ -75,8 +81,8 @@ function Dashboard() {
               className="bg-white shadow rounded-lg"
             >
               <div className="p-5 flex items-center">
-                <div className="flex-shrink-0">
-                  <img src={stat.img} alt={stat.name} className="h-16 w-16 object-contain rounded" onError={e => { e.target.style.display = 'none'; }} />
+                <div className={`flex-shrink-0 rounded-full ${stat.color} flex items-center justify-center h-16 w-16`}>
+                  <stat.icon className={`h-10 w-10 ${stat.iconColor}`} />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
