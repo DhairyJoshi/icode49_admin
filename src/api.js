@@ -127,14 +127,17 @@ export async function allTechnologyAPI() {
 }
 
 // Portfolio Create API
-export async function portfolioCreateAPI({ category, title, description, project_duration, website_link, image, technology }) {
+export async function portfolioCreateAPI({ category, title, description, project_duration, website_link, image, image_alt, technology }) {
   const formData = new FormData();
   formData.append('category', category);
   formData.append('title', title);
   formData.append('description', description);
   formData.append('project_duration', project_duration);
   formData.append('website_link', website_link);
-  if (image) formData.append('image', image);
+  if (image) {
+    formData.append('image', image); 
+    formData.append('image_alt', image_alt);
+  }
   if (Array.isArray(technology)) {
     formData.append('technology', JSON.stringify(technology));
   }
@@ -161,7 +164,10 @@ export async function portfolioUpdateAPI({ id, category, title, description, pro
   formData.append('description', description);
   formData.append('project_duration', project_duration);
   formData.append('website_link', website_link);
-  if (image) formData.append('image', image);
+  if (image) {
+    formData.append('image', image);
+    formData.append('image_alt', image_alt);
+  }
   if (Array.isArray(technology)) {
     formData.append('technology', JSON.stringify(technology));
   }

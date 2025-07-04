@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { PlusIcon, XMarkIcon, PencilIcon } from '@heroicons/react/24/outline'
+import { Editor } from 'primereact/editor'
 import { allPortfolioCategoryAPI, allTechnologyAPI } from '../api'
 import { fetchProjects, createProject, updateProject } from '../slices/projectSlice'
+import ProjectsTable from "./ProjectsTable";
 
 function ProjectManager() {
   const dispatch = useDispatch()
@@ -15,18 +17,33 @@ function ProjectManager() {
     project_duration: '',
     website_link: '',
     image: null,
+    image_alt: '',
     technology: [],
   })
   const [categories, setCategories] = useState([])
   const [technologies, setTechnologies] = useState([])
   const [imagePreview, setImagePreview] = useState(null)
   const [editingProject, setEditingProject] = useState(null)
+  const [techDropdownOpen, setTechDropdownOpen] = useState(false)
 
   useEffect(() => {
     dispatch(fetchProjects())
     fetchCategories()
     fetchTechnologies()
   }, [dispatch])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.technology-dropdown')) {
+        setTechDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const fetchCategories = async () => {
     try {
@@ -55,6 +72,7 @@ function ProjectManager() {
         ...formData,
         technology: formData.technology,
         image: formData.image,
+        image_alt: formData.image_alt,
       })).then((action) => {
         if (action.type.endsWith('fulfilled')) {
           closeDrawer()
@@ -66,6 +84,7 @@ function ProjectManager() {
         ...formData,
         technology: formData.technology,
         image: formData.image,
+        image_alt: formData.image_alt,
       })).then((action) => {
         if (action.type.endsWith('fulfilled')) {
           closeDrawer()
@@ -95,6 +114,7 @@ function ProjectManager() {
       project_duration: project.project_duration || '',
       website_link: project.website_link || '',
       image: null,
+      image_alt: project.image_alt || '',
       technology: (project.technology_ids || project.technology || []),
     })
     setImagePreview(project.image ? project.image : null)
@@ -110,6 +130,7 @@ function ProjectManager() {
       project_duration: '',
       website_link: '',
       image: null,
+      image_alt: '',
       technology: [],
     })
     setImagePreview(null)
@@ -126,6 +147,7 @@ function ProjectManager() {
       project_duration: '',
       website_link: '',
       image: null,
+      image_alt: '',
       technology: [],
     })
     setImagePreview(null)
@@ -141,7 +163,7 @@ function ProjectManager() {
         </div>
         <button
           onClick={openCreateDrawer}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-600 hover:bg-pink-700"
         >
           <PlusIcon className="h-4 w-4 mr-2" />
           Add Project
@@ -149,72 +171,21 @@ function ProjectManager() {
       </div>
 
       {/* Projects List */}
-      <div className="bg-white shadow rounded-lg">
-        {status === 'loading' && (
-          <div className="text-center py-12 text-gray-500">Loading projects...</div>
-        )}
-        {error && (
-          <div className="text-center py-12 text-red-500">Error: {error}</div>
-        )}
-        {projects.length > 0 && (
-          <div className="overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Technologies</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Website</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {projects.map((project, idx) => (
-                  <tr key={project.id || project._id || idx} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">{project.title}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{project.category_name || project.category}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {Array.isArray(project.technology)
-                        ? project.technology
-                            .map(id => {
-                              const tech = technologies.find(t => (t.id || t._id || t.technology) == id);
-                              return tech ? (tech.technology || tech.name || tech.title) : id;
-                            })
-                            .join(', ')
-                        : (project.technology_names || project.technology || []).join(', ')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{project.project_duration}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {project.website_link && (
-                        <a href={project.website_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Visit</a>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button
-                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-blue-600 hover:text-blue-900"
-                        onClick={() => openEditDrawer(project)}
-                      >
-                        <PencilIcon className="h-4 w-4 mr-1" /> Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        {projects.length === 0 && status !== 'loading' && (
-          <div className="text-center py-12 text-gray-500">No projects found.</div>
-        )}
-      </div>
+      <ProjectsTable 
+        projects={projects} 
+        technologies={technologies}
+        categories={categories}
+        onEdit={openEditDrawer} 
+        onView={() => {}} 
+        onDelete={() => {}} 
+      />
       {/* Drawer */}
       <div>
         {showDrawer && (
           <div className="fixed inset-0 bg-white/35 backdrop-blur-sm bg-opacity-40 z-40 transition-opacity" onClick={closeDrawer} />
         )}
         <div
-          className={`fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white shadow-2xl flex flex-col h-full transition-transform duration-300 ease-in-out transform ${showDrawer ? 'translate-x-0' : 'translate-x-full'} pointer-events-auto`}
+          className={`fixed inset-y-0 right-0 z-50 w-full max-w-4xl bg-white shadow-2xl flex flex-col h-full transition-transform duration-300 ease-in-out transform ${showDrawer ? 'translate-x-0' : 'translate-x-full'} pointer-events-auto`}
           style={{ willChange: 'transform' }}
         >
           <div className="flex items-center justify-between px-6 py-4 border-b">
@@ -231,7 +202,7 @@ function ProjectManager() {
             </button>
           </div>
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-6 md:py-8 space-y-6">
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Category */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
@@ -250,7 +221,7 @@ function ProjectManager() {
                 </select>
               </div>
               {/* Title */}
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input
                   type="text"
@@ -262,14 +233,12 @@ function ProjectManager() {
                 />
               </div>
               {/* Description */}
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  rows={3}
-                  required
+                <Editor
                   value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300"
+                  onTextChange={e => setFormData({ ...formData, description: e.htmlValue })}
+                  style={{ height: '200px' }}
                   placeholder="Describe your project..."
                 />
               </div>
@@ -298,52 +267,149 @@ function ProjectManager() {
               </div>
               {/* Image */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Project Image</label>
+                <div className="flex items-center justify-center w-full">
+                  <label htmlFor="project-image-upload" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-gray-400">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      {imagePreview ? (
+                        <img src={imagePreview} alt="Project Preview" className="h-40 object-contain mb-2" />
+                      ) : (
+                        <>
+                          <svg className="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                          </svg>
+                          <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                          <p className="text-xs text-gray-500">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                        </>
+                      )}
+                    </div>
+                    <input id="project-image-upload" type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                  </label>
+                </div>
+              </div>
+              {/* Image Alt */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image Alt</label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
+                  type="text"
+                  value={formData.image_alt}
+                  onChange={e => setFormData({ ...formData, image_alt: e.target.value })}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300"
+                  placeholder="Image alt text"
                 />
-                {imagePreview && (
-                  <img src={imagePreview} alt="Preview" className="mt-2 h-24 rounded" />
-                )}
               </div>
               {/* Technology */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Technologies</label>
-                <select
-                  multiple
-                  required
-                  value={formData.technology}
-                  onChange={handleTechChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300"
-                >
-                  {technologies.map(tech => (
-                    <option key={tech.id || tech._id || tech.technology} value={tech.id || tech._id || tech.technology}>
-                      {tech.technology || tech.name || tech.title}
-                    </option>
-                  ))}
-                </select>
-                <div className="text-xs text-gray-500 mt-1">Hold Ctrl (Windows) or Cmd (Mac) to select multiple</div>
+                <div className="relative technology-dropdown">
+                  <select
+                    multiple
+                    required
+                    value={formData.technology}
+                    onChange={handleTechChange}
+                    className="hidden"
+                    id="technology-select"
+                  >
+                    {technologies.map(tech => (
+                      <option key={tech.id || tech._id || tech.technology} value={tech.id || tech._id || tech.technology}>
+                        {tech.technology || tech.name || tech.title}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  {/* Custom Dropdown UI */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setTechDropdownOpen(!techDropdownOpen)}
+                      className="relative py-3 ps-4 pe-9 flex gap-x-2 text-nowrap w-full cursor-pointer bg-white border border-gray-200 rounded-lg text-start text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    >
+                      <span className="text-gray-500">
+                        {formData.technology.length > 0 
+                          ? `${formData.technology.length} selected` 
+                          : "Select technologies..."}
+                      </span>
+                      <div className="absolute top-1/2 end-3 -translate-y-1/2">
+                        <svg className="shrink-0 size-3.5 text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="m7 15 5 5 5-5"/>
+                          <path d="m7 9 5-5 5 5"/>
+                        </svg>
+                      </div>
+                    </button>
+                    
+                    {techDropdownOpen && (
+                      <div className="absolute mt-2 z-50 w-full max-h-72 p-1 space-y-0.5 bg-white border border-gray-200 rounded-lg overflow-hidden overflow-y-auto shadow-lg">
+                        {technologies.map(tech => {
+                          const techId = tech.id || tech._id || tech.technology;
+                          const isSelected = formData.technology.includes(techId);
+                          return (
+                            <div
+                              key={techId}
+                              onClick={() => {
+                                const newTech = isSelected 
+                                  ? formData.technology.filter(t => t !== techId)
+                                  : [...formData.technology, techId];
+                                setFormData({ ...formData, technology: newTech });
+                              }}
+                              className="py-2 px-4 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg focus:outline-none focus:bg-gray-100"
+                            >
+                              <div className="flex justify-between items-center w-full">
+                                <span>{tech.technology || tech.name || tech.title}</span>
+                                {isSelected && (
+                                  <span>
+                                    <svg className="shrink-0 size-3.5 text-pink-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Selected Technologies Display */}
+                  {formData.technology.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {formData.technology.map(techId => {
+                        const tech = technologies.find(t => (t.id || t._id || t.technology) == techId);
+                        return tech ? (
+                          <span
+                            key={techId}
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-600"
+                          >
+                            {tech.technology || tech.name || tech.title}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newTech = formData.technology.filter(t => t !== techId);
+                                setFormData({ ...formData, technology: newTech });
+                              }}
+                              className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full text-pink-400 hover:bg-pink-200 hover:text-pink-500 focus:outline-none"
+                            >
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                              </svg>
+                            </button>
+                          </span>
+                        ) : null;
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition duration-150 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 px-4 rounded-lg transition duration-150 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
                 disabled={editingProject ? updateStatus === 'loading' : createStatus === 'loading'}
               >
                 {editingProject
                   ? updateStatus === 'loading' ? 'Updating...' : 'Update Project'
                   : createStatus === 'loading' ? 'Adding...' : 'Add Project'}
-              </button>
-              <button
-                type="button"
-                onClick={closeDrawer}
-                className="w-full mt-2 bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-              >
-                Cancel
               </button>
               {editingProject && updateSuccess && <div className="mt-2 text-green-600 text-sm">{updateSuccess}</div>}
               {editingProject && updateError && <div className="mt-2 text-red-500 text-sm">{updateError}</div>}

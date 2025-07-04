@@ -7,29 +7,33 @@ function getSortIcon(column, sortBy, sortDir) {
   return sortDir === "asc" ? "▲" : "▼";
 }
 
-export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
+export default function ProjectsTable({ projects, technologies = [], categories = [], onEdit, onView, onDelete }) {
   const [sortBy, setSortBy] = useState("title");
   const [sortDir, setSortDir] = useState("asc");
   const [selected, setSelected] = useState([]);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [hasOverflow, setHasOverflow] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [rowsDropdownOpen, setRowsDropdownOpen] = useState(false);
   const rowsDropdownRef = useRef(null);
-  const statusDropdownRef = useRef(null);
-  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+  const categoryDropdownRef = useRef(null);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const tableContainerRef = useRef(null);
 
-  // Get unique statuses for dropdown
-  const uniqueStatuses = Array.from(new Set(blogs.map(blog => blog.status)));
+  // Get unique category IDs for dropdown
+  const uniqueCategoryIds = Array.from(new Set(projects.map(project => {
+    if (project.category_name) return null; // prefer not to show if name is present
+    if (typeof project.category === 'object' && project.category !== null) return project.category.id || project.category._id || project.category.category;
+    return project.category;
+  }))).filter(Boolean);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target)) {
-        setStatusDropdownOpen(false);
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+        setCategoryDropdownOpen(false);
       }
       if (rowsDropdownRef.current && !rowsDropdownRef.current.contains(event.target)) {
         setRowsDropdownOpen(false);
@@ -55,7 +59,7 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
       clearTimeout(timeoutId);
       window.removeEventListener('resize', checkOverflow);
     };
-  }, [search, statusFilter, sortBy, sortDir]);
+  }, [search, categoryFilter, sortBy, sortDir]);
 
   // Sorting
   const handleSort = (column) => {
@@ -67,20 +71,17 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
     }
   };
 
-  const sortedBlogs = [...blogs].sort((a, b) => {
+  const sortedProjects = [...projects].sort((a, b) => {
     let valA, valB;
     if (sortBy === "title") {
       valA = a.title?.toLowerCase() || "";
       valB = b.title?.toLowerCase() || "";
     } else if (sortBy === "category") {
-      valA = a.category_name?.toLowerCase() || "";
-      valB = b.category_name?.toLowerCase() || "";
-    } else if (sortBy === "author") {
-      valA = a.author?.toLowerCase() || "";
-      valB = b.author?.toLowerCase() || "";
-    } else if (sortBy === "status") {
-      valA = a.status?.toLowerCase() || "";
-      valB = b.status?.toLowerCase() || "";
+      valA = (a.category_name || a.category)?.toLowerCase() || "";
+      valB = (b.category_name || b.category)?.toLowerCase() || "";
+    } else if (sortBy === "duration") {
+      valA = a.project_duration?.toLowerCase() || "";
+      valB = b.project_duration?.toLowerCase() || "";
     } else {
       return 0;
     }
@@ -90,30 +91,29 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
   });
 
   // Filtering
-  const filteredBlogs = sortedBlogs.filter(blog => {
+  const filteredProjects = sortedProjects.filter(project => {
     const q = search.toLowerCase();
     const matchesSearch =
-      blog.title?.toLowerCase().includes(q) ||
-      blog.category_name?.toLowerCase().includes(q) ||
-      blog.author?.toLowerCase().includes(q) ||
-      blog.status?.toLowerCase().includes(q) ||
-      blog.description?.toLowerCase().includes(q);
-    const matchesStatus = statusFilter && statusFilter !== "all" ? blog.status === statusFilter : true;
-    return matchesSearch && matchesStatus;
+      project.title?.toLowerCase().includes(q) ||
+      (project.category_name || project.category)?.toLowerCase().includes(q) ||
+      project.description?.toLowerCase().includes(q) ||
+      project.project_duration?.toLowerCase().includes(q);
+    const matchesCategory = categoryFilter && categoryFilter !== "all" ? (project.category_name || project.category) === categoryFilter : true;
+    return matchesSearch && matchesCategory;
   });
 
-  const totalPages = Math.ceil(filteredBlogs.length / pageSize);
-  const paginatedBlogs = filteredBlogs.slice((page - 1) * pageSize, page * pageSize);
-  const rowsEnd = Math.min(page * pageSize, filteredBlogs.length);
+  const totalPages = Math.ceil(filteredProjects.length / pageSize);
+  const paginatedProjects = filteredProjects.slice((page - 1) * pageSize, page * pageSize);
+  const rowsEnd = Math.min(page * pageSize, filteredProjects.length);
 
   // Reset to page 1 if filters/search change and current page is out of range
   useEffect(() => {
     if (page > totalPages) setPage(1);
-  }, [search, statusFilter, sortBy, sortDir, totalPages, pageSize]);
+  }, [search, categoryFilter, sortBy, sortDir, totalPages, pageSize]);
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelected(filteredBlogs.map(blog => blog.id || blog._id));
+      setSelected(filteredProjects.map(project => project.id || project._id));
     } else {
       setSelected([]);
     }
@@ -131,56 +131,60 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
     <div className="my-5 relative rounded-t-lg shadow-md bg-white">
       <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-3 pb-1 mb-4">
         <div className="text-2xl">
-          {selected.length > 0 ? `${selected.length} selected` : "Blogs"}
+          {selected.length > 0 ? `${selected.length} selected` : "Projects"}
         </div>
         <div className="flex gap-2 items-center ms-auto">
-          <div className="relative w-48" ref={statusDropdownRef}>
-            <input type="hidden" name="status" id="selected-status" value={statusFilter} />
+          <div className="relative w-48" ref={categoryDropdownRef}>
+            <input type="hidden" name="category" id="selected-category" value={categoryFilter} />
             <button
               type="button"
               className="mt-2 w-full h-[3.15rem] px-4 text-left text-[1.063rem] font-normal text-[#333] border border-[#C7BEBE] border-b-[0.156rem] rounded-lg bg-transparent transition-all duration-300 ease-in-out focus:border-pink-600 hover:border-pink-600 flex items-center justify-between"
               onClick={e => {
                 e.stopPropagation();
-                setStatusDropdownOpen(!statusDropdownOpen);
+                setCategoryDropdownOpen(!categoryDropdownOpen);
               }}
             >
-              <span>{statusFilter || "Select Status"}</span>
+              <span>{categoryFilter || "Select Category"}</span>
               <svg className="w-5 h-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 14l6-6H4l6 6z" clipRule="evenodd" />
               </svg>
             </button>
-            <ul className={`absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md max-h-[200px] overflow-auto ${statusDropdownOpen ? '' : 'hidden'}`}>
+            <ul className={`absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-md max-h-[200px] overflow-auto ${categoryDropdownOpen ? '' : 'hidden'}`}>
               <li
                 className="px-4 py-2 text-gray-400 cursor-not-allowed"
                 data-value=""
               >
-                Select Status
+                Select Category
               </li>
               <li
                 className="cursor-pointer px-4 py-2 hover:bg-gray-100"
                 data-value="all"
                 onClick={e => {
                   e.stopPropagation();
-                  setStatusFilter("all");
-                  setStatusDropdownOpen(false);
+                  setCategoryFilter("all");
+                  setCategoryDropdownOpen(false);
                 }}
               >
                 All
               </li>
-              {uniqueStatuses.map(status => (
-                <li
-                  key={status}
-                  className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-                  data-value={status}
-                  onClick={e => {
-                    e.stopPropagation();
-                    setStatusFilter(status);
-                    setStatusDropdownOpen(false);
-                  }}
-                >
-                  {status}
-                </li>
-              ))}
+              {uniqueCategoryIds.map(categoryId => {
+                const cat = categories.find(c => (c.id || c._id || c.category) == categoryId);
+                const name = cat ? (cat.category || cat.name || cat.title) : categoryId;
+                return (
+                  <li
+                    key={categoryId}
+                    className="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                    data-value={categoryId}
+                    onClick={e => {
+                      e.stopPropagation();
+                      setCategoryFilter(categoryId);
+                      setCategoryDropdownOpen(false);
+                    }}
+                  >
+                    {name}
+                  </li>
+                );
+              })}
             </ul>
           </div>
           <div className="relative w-80">
@@ -189,9 +193,9 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
             </div>
             <input
               type="text"
-              id="table-search-blogs"
+              id="table-search-projects"
               className="mt-2 w-full h-[3.15rem] pl-12 pr-12 text-[1.063rem] font-normal text-[#333] border border-[#C7BEBE] border-b-[0.156rem] rounded-lg bg-transparent transition-all duration-300 ease-in-out focus:border-pink-600 hover:border-pink-600 focus:outline-none placeholder-gray-400"
-              placeholder="Search for blogs"
+              placeholder="Search for projects"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -217,7 +221,7 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
                 <div className="flex items-center">
                   <Checkbox
                     id="checkbox-all-search"  
-                    checked={filteredBlogs.length > 0 && filteredBlogs.every(blog => selected.includes(blog.id || blog._id))}
+                    checked={filteredProjects.length > 0 && filteredProjects.every(project => selected.includes(project.id || project._id))}
                     onChange={handleSelectAll}
                   />
                 </div>
@@ -225,46 +229,106 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
               <th scope="col" className="w-48 px-6 py-3 cursor-pointer select-none" onClick={() => handleSort("title")}>Title {getSortIcon("title", sortBy, sortDir)}</th>
               <th scope="col" className="w-64 px-6 py-3">Description</th>
               <th scope="col" className="w-40 px-6 py-3 cursor-pointer select-none" onClick={() => handleSort("category")}>Category {getSortIcon("category", sortBy, sortDir)}</th>
-              <th scope="col" className="w-40 px-6 py-3 cursor-pointer select-none" onClick={() => handleSort("author")}>Author {getSortIcon("author", sortBy, sortDir)}</th>
-              <th scope="col" className="w-40 px-6 py-3">Poster</th>
-              <th scope="col" className="w-40 px-6 py-3">Publish Date</th>
-              <th scope="col" className="w-32 px-6 py-3 cursor-pointer select-none" onClick={() => handleSort("status")}>Status {getSortIcon("status", sortBy, sortDir)}</th>
+              <th scope="col" className="w-40 px-6 py-3">Technologies</th>
+              <th scope="col" className="w-40 px-6 py-3 cursor-pointer select-none" onClick={() => handleSort("duration")}>Duration {getSortIcon("duration", sortBy, sortDir)}</th>
+              <th scope="col" className="w-40 px-6 py-3">Image</th>
+              <th scope="col" className="w-40 px-6 py-3">Website</th>
               <th scope="col" className="w-32 px-6 py-3 sticky right-0 bg-white">Action</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedBlogs.map((blog) => (
-              <tr key={blog.id || blog._id} className={`group ${selected.includes(blog.id || blog._id) ? 'bg-pink-100 hover:bg-pink-200' : 'bg-transparent hover:bg-pink-100'}`}>
+            {paginatedProjects.map((project) => (
+              <tr key={project.id || project._id} className={`group ${selected.includes(project.id || project._id) ? 'bg-pink-100 hover:bg-pink-200' : 'bg-transparent hover:bg-pink-100'}`}>
                 <td className="w-16 p-4">
                   <div className="flex items-center">
                     <Checkbox
-                      id={`checkbox-table-search-${blog.id || blog._id}`}
-                      checked={selected.includes(blog.id || blog._id)}
-                      onChange={() => handleSelect(blog.id || blog._id)}
+                      id={`checkbox-table-search-${project.id || project._id}`}
+                      checked={selected.includes(project.id || project._id)}
+                      onChange={() => handleSelect(project.id || project._id)}
                     />
                   </div>
                 </td>
                 <td className="w-48 px-6 py-4 text-gray-900">
-                  <div className="text-sm font-medium break-words min-w-0 w-full">{blog.title}</div>
+                  <div className="text-sm font-medium break-words min-w-0 w-full">{project.title}</div>
                 </td>
-                <td className="w-64 px-6 py-4 max-w-xs truncate" title={blog.description}>{blog.description}</td>
-                <td className="w-40 px-6 py-4">{blog.category_name}</td>
-                <td className="w-40 px-6 py-4">{blog.author}</td>
+                <td className="w-64 px-6 py-4 max-w-xs truncate" title={project.description}>{project.description}</td>
+                <td className="w-40 px-6 py-4">{
+                  (() => {
+                    // Prefer category_name if present
+                    if (project.category_name) return project.category_name;
+                    // If project.category is an object with a name
+                    if (typeof project.category === 'object' && project.category !== null) {
+                      return project.category.name || project.category.title || project.category.category || '';
+                    }
+                    // If project.category is an ID, map to name
+                    if (project.category) {
+                      const cat = categories.find(c => (c.id || c._id || c.category) == project.category);
+                      return cat ? (cat.category || cat.name || cat.title) : project.category;
+                    }
+                    return '';
+                  })()
+                }</td>
                 <td className="w-40 px-6 py-4">
-                  {blog.poster && (
-                    <img src={`${IMAGE_BASE_URL}${blog.poster}`} alt={blog.poster_alt || 'Poster'} className="h-12 w-20 object-cover rounded" />
+                  <div className="flex flex-wrap gap-1">
+                    {(() => {
+                      let techNames = [];
+                      if (Array.isArray(project.technology)) {
+                        // If technology is an array of IDs, map them to names
+                        techNames = project.technology.map(techId => {
+                          const tech = technologies.find(t => (t.id || t._id || t.technology) == techId);
+                          return tech ? (tech.technology || tech.name || tech.title) : techId;
+                        });
+                      } else if (project.technology_names) {
+                        // If technology_names is already provided
+                        techNames = project.technology_names;
+                      } else if (project.technology) {
+                        // Fallback to technology field
+                        techNames = Array.isArray(project.technology) ? project.technology : [project.technology];
+                      }
+                      
+                      return (
+                        <>
+                          {techNames.slice(0, 2).map((techName, index) => (
+                            <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-600">
+                              {techName}
+                            </span>
+                          ))}
+                          {techNames.length > 2 && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                              +{techNames.length - 2}
+                            </span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </td>
+                <td className="w-40 px-6 py-4">{project.project_duration}</td>
+                <td className="w-40 px-6 py-4">
+                  {project.image && (
+                    <img src={`${IMAGE_BASE_URL}${project.image}`} alt={project.image_alt || 'Project'} className="h-12 w-20 object-cover rounded" />
                   )}
                 </td>
-                <td className="w-40 px-6 py-4">{blog.publish_date}</td>
-                <td className="w-32 px-6 py-4">{blog.status}</td>
-                <td className={`w-32 px-6 py-4 sticky right-0 ${selected.includes(blog.id || blog._id) ? 'bg-pink-100 group-hover:bg-pink-200' : 'bg-white group-hover:bg-pink-100'}`}>
+                <td className="w-40 px-6 py-4">
+                  {project.website_link && (
+                    <a 
+                      href={project.website_link} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Visit
+                    </a>
+                  )}
+                </td>
+                <td className={`w-32 px-6 py-4 sticky right-0 ${selected.includes(project.id || project._id) ? 'bg-pink-100 group-hover:bg-pink-200' : 'bg-white group-hover:bg-pink-100'}`}>
                   <div className="flex items-center gap-2">
                     {/* Edit */}
-                    <button type="button" title="Edit Blog" onClick={() => onEdit && onEdit(blog)}>
+                    <button type="button" title="Edit Project" onClick={() => onEdit && onEdit(project)}>
                       <PencilIcon className="h-5 w-5 text-pink-600" />
                     </button>
                     {/* View */}
-                    <button type="button" title="View Blog" onClick={() => onView && onView(blog)}>
+                    <button type="button" title="View Project" onClick={() => onView && onView(project)}>
                       <lord-icon
                         src="https://cdn.lordicon.com/dicvhxpz.json"
                         trigger="hover"
@@ -274,7 +338,7 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
                       </lord-icon>
                     </button>
                     {/* Delete */}
-                    <button type="button" title="Delete Blog" onClick={() => onDelete && onDelete(blog)}>
+                    <button type="button" title="Delete Project" onClick={() => onDelete && onDelete(project)}>
                       <lord-icon
                         src="https://cdn.lordicon.com/jzinekkv.json"
                         trigger="hover"
@@ -287,9 +351,9 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
                 </td>
               </tr>
             ))}
-            {filteredBlogs.length === 0 && (
+            {filteredProjects.length === 0 && (
               <tr>
-                <td colSpan={8} className="text-center py-8 text-gray-400">No blogs found.</td>
+                <td colSpan={9} className="text-center py-8 text-gray-400">No projects found.</td>
               </tr>
             )}
           </tbody>
@@ -299,7 +363,7 @@ export default function BlogTable({ blogs, onEdit, onView, onDelete }) {
       <div className="w-full border border-white flex items-center justify-between px-6 py-4 bg-white rounded-b-lg overflow-visible absolute z-20">
         {/* Left: Showing X out of Y */}
         <div className="text-gray-800 text-base">
-          Showing {filteredBlogs.length === 0 ? 0 : rowsEnd} out of {filteredBlogs.length}
+          Showing {filteredProjects.length === 0 ? 0 : rowsEnd} out of {filteredProjects.length}
         </div>
         {/* Center: Pagination */}
         <div className="flex items-center gap-2">
